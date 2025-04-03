@@ -16,8 +16,11 @@ class PubMedArticle:
     pmid: str = ""
     abstract: str = ""
     status_tiab: StatusType = "pending"
+    tiab_notes: str = ""
     status_fts: StatusType = "pending"
+    fts_notes: str = ""
     status_pdf_fetch: StatusType = "pending"
+    pdf_link: Optional[str] = None
     molecules: List[str] = field(default_factory=list)
     pdf_path: Optional[str] = None
 
@@ -35,6 +38,9 @@ class PubMedArticle:
             f"DO  - {self.doi}" if self.doi else "",
             f"AB  - {self.abstract}" if self.abstract else "",
             f"ID  - {self.pmid}",
+            f"N1  - TIAB: {self.tiab_notes}" if self.tiab_notes else "",
+            f"N2  - FTS: {self.fts_notes}" if self.fts_notes else "",
+            f"UR  - https://pubmed.ncbi.nlm.nih.gov/{self.pmid}/",
             "ER  -"
         ]
         return "\n".join(filter(None, ris))

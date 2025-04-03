@@ -9,13 +9,15 @@ ollama_request_timeout = 600
 ollama_num_ctx = 32768
 thinking = false
 request_delay_seconds = 1
-output_dir = "tiab_screening"
+output_dir = "./"
 articles_file = "articles.json"
+
 # --- Criteria Files ---
 inclusion_criteria_file = "inclusion_criteria.txt"
 exclusion_criteria_file = "exclusion_criteria.txt"
 
 # --- TIAB Screening Settings ---
+tiab_enabled = true
 tiab_prompt_file = "prompts/tiab_prompt.txt" 
 pmid_input_file = "pmid_for_review.txt"
 pmid_batch_size = 25
@@ -28,7 +30,6 @@ unpaywall_email = "jorrit332@gmail.com"
 # --- Full-Text Screening (FTS) Settings ---
 fts_enabled = true
 fts_prompt_file = "prompts/fts_prompt.txt"
-fts_output_dir = "fts_screening"
 
 # --- Molecule Extraction Settings ---
 mol_extraction_enabled = true

@@ -190,6 +190,7 @@ class TiabScreener:
                     
                 run_processed_count += 1
                 
+                
                 # Download PDF if article was accepted
                 if status == "Accepted" and self.pdf_downloader:
                     pdf_success = self.pdf_downloader.download_pdf(article)
@@ -200,7 +201,9 @@ class TiabScreener:
                         print(f"  PDF Download Failed for PMID {pmid}")
                     
                     # Update article in the dictionary
+                    article.tiab_notes = screening_result
                     self.articles[pmid] = article
+
                     save_articles_to_json(self.articles, self.articles_file)
                     
                     time.sleep(delay)
@@ -332,15 +335,19 @@ class FTScreener:
             outcome = screening_result.lower().strip()
             if "fts relevant" in outcome:
                 article.status_fts = "accepted"
+                article.fts_notes = screening_result
                 status = "FTS Accepted"
             elif "fts not relevant" in outcome:
-                article.status_fts = "rejected"
+                article.status_fts = "rejected" 
+                article.fts_notes = screening_result
                 status = "FTS Rejected"
             else:
                 article.status_fts = "error"
+                article.fts_notes = screening_result 
                 status = "Error - Unclear FTS"
         else:
             article.status_fts = "error"
+            article.fts_notes = screening_result
             status = "Error - No FTS Result"
             
         # Save updated articles data

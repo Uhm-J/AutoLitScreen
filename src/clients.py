@@ -187,6 +187,7 @@ class PdfDownloader:
             best_oa_location = data.get('best_oa_location')
             if best_oa_location and best_oa_location.get('url_for_pdf'): 
                 pdf_url = best_oa_location['url_for_pdf']
+                article.pdf_link = pdf_url
                 print(f"  PDF Download: Found OA PDF URL via Unpaywall ({best_oa_location.get('host_type', 'unknown')}): {pdf_url}")
             else: 
                 print(f"  PDF Download: No OA PDF link found via Unpaywall for DOI {doi}.")

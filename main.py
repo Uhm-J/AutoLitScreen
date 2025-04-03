@@ -42,17 +42,101 @@ import os
 import sys
 import traceback
 import requests
+import argparse
+from datetime import datetime
 
 from src.utils import load_config, load_articles_from_json
 from src.screeners import TiabScreener, FTScreener, MoleculeExtractor
 
+def export_to_ris(articles_file, output_file, include_tiab=True, include_fts=True):
+    """
+    Export articles from JSON to RIS format
+    
+    Parameters:
+    - articles_file: Path to the articles.json file
+    - output_file: Path to save the RIS output
+    - include_tiab: Include articles accepted in TIAB phase (if FTS not done)
+    - include_fts: Include articles accepted in FTS phase if available
+    
+    Returns:
+    - Number of articles exported
+    """
+    if not os.path.exists(articles_file):
+        print(f"Error: Articles file '{articles_file}' not found.")
+        return 0
+    
+    articles = load_articles_from_json(articles_file)
+    if not articles:
+        print("No articles found in the JSON file.")
+        return 0
+    
+    exported_count = 0
+    with open(output_file, 'w', encoding='utf-8') as f:
+        for pmid, article in articles.items():
+            # Determine if this article should be included
+            should_export = False
+            
+            # If FTS is completed and we want FTS-accepted articles
+            if include_fts and article.status_fts == "accepted":
+                should_export = True
+            # If article passed TIAB but no FTS or we specifically want TIAB articles
+            elif include_tiab and article.status_tiab == "accepted":
+                should_export = True
+                
+            if should_export:
+                # Use the built-in to_ris method
+                ris_content = article.to_ris()
+                
+                # Add our custom screening status note since it's not in the default to_ris method
+                ris_lines = ris_content.split('\n')
+
+                # Write the modified RIS entry
+                f.write('\n'.join(ris_lines) + '\n\n')
+                exported_count += 1
+    
+    return exported_count
+
 if __name__ == "__main__":
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description="Automated Literature Screening")
+    parser.add_argument("--ris", action="store_true", help="Export accepted articles to RIS format")
+    parser.add_argument("--tiab-only", action="store_true", help="When used with --ris, export only TIAB accepted articles")
+    parser.add_argument("--fts-only", action="store_true", help="When used with --ris, export only FTS accepted articles")
+    parser.add_argument("--output", "-o", default="accepted_articles.ris", help="Output filename for RIS export (default: accepted_articles.ris)")
+    args = parser.parse_args()
+    
     CONFIG_FILE = "config.toml"
-    if not os.path.exists(CONFIG_FILE): print(f"Error: Config file '{CONFIG_FILE}' not found."); sys.exit(1)
+    if not os.path.exists(CONFIG_FILE): 
+        print(f"Error: Config file '{CONFIG_FILE}' not found.")
+        sys.exit(1)
 
     config = {}
     try:
         config = load_config(CONFIG_FILE)
+        
+        # Handle RIS export if requested
+        if args.ris:
+            articles_file = os.path.join(config['output_dir'], "articles.json")
+            include_tiab = not args.fts_only
+            include_fts = not args.tiab_only
+            
+            print(f"\n--- Exporting articles to RIS format ---")
+            exported = export_to_ris(
+                articles_file, 
+                args.output,
+                include_tiab=include_tiab,
+                include_fts=include_fts
+            )
+            
+            if exported > 0:
+                print(f"Successfully exported {exported} articles to {args.output}")
+            else:
+                print("No articles were exported.")
+            
+            # Exit after export
+            sys.exit(0)
+        
+        # Check Ollama connection for screening process
         ollama_base_url = config.get("ollama_url", "").replace("/api/generate", "/")
         if not ollama_base_url: raise ValueError("'ollama_url' missing/empty.")
         response = requests.get(ollama_base_url, timeout=5)
