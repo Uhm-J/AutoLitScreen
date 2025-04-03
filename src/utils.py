@@ -1,7 +1,11 @@
 import os
 import sys
 import toml
-from typing import Set, List, Optional
+import json
+import datetime
+from typing import Set, List, Optional, Dict, Tuple, Any
+from dataclasses import asdict
+from .models import PubMedArticle
 
 def load_config(config_path: str) -> dict:
     """Loads and validates configuration from a TOML file."""
@@ -103,4 +107,41 @@ def load_text_file(filepath: str) -> Optional[str]:
      try:
          with open(filepath, 'r', encoding='utf-8') as f: return f.read()
      except FileNotFoundError: print(f"Error: File not found: {filepath}"); return None
-     except IOError as e: print(f"Error reading file {filepath}: {e}"); return None 
+     except IOError as e: print(f"Error reading file {filepath}: {e}"); return None
+
+def save_articles_to_json(articles: Dict[str, PubMedArticle], filepath: str) -> bool:
+    """Saves a dictionary of PubMedArticle objects to a JSON file."""
+    try:
+        # Create parent directory if it doesn't exist
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        
+        # Convert dataclasses to dictionaries
+        articles_dict = {pmid: asdict(article) for pmid, article in articles.items()}
+        
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(articles_dict, f, indent=2)
+        
+        return True
+    except Exception as e:
+        print(f"Error saving articles to {filepath}: {e}")
+        return False
+
+def load_articles_from_json(filepath: str) -> Dict[str, PubMedArticle]:
+    """Loads PubMedArticle objects from a JSON file."""
+    articles: Dict[str, PubMedArticle] = {}
+    
+    if not os.path.exists(filepath):
+        return articles
+    
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            articles_dict = json.load(f)
+        
+        # Convert dictionaries back to PubMedArticle objects
+        for pmid, article_dict in articles_dict.items():
+            articles[pmid] = PubMedArticle(**article_dict)
+        
+        return articles
+    except Exception as e:
+        print(f"Error loading articles from {filepath}: {e}")
+        return {} 

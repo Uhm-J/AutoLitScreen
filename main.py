@@ -43,7 +43,7 @@ import sys
 import traceback
 import requests
 
-from src.utils import load_config
+from src.utils import load_config, load_articles_from_json
 from src.screeners import TiabScreener, FTScreener, MoleculeExtractor
 
 if __name__ == "__main__":
@@ -80,31 +80,37 @@ if __name__ == "__main__":
 
     # --- Run Molecule Extraction Phase (Optional) ---
     if config.get('mol_extraction_enabled', False):
-        run_mol_extraction = False
-        source_file_exists = False
-        if config.get('fts_enabled'):
-            fts_accepted_path = os.path.join(config['fts_output_dir'], "fts_accepted.txt")
-            if fts_ran_ok and os.path.exists(fts_accepted_path):
-                 run_mol_extraction = True
-                 source_file_exists = True
-            else: print(f"\nSkipping Molecule Extraction: FTS enabled but failed or '{os.path.basename(fts_accepted_path)}' not found.")
-        else: # FTS disabled, run on TIAB results if available
-            tiab_accepted_path = os.path.join(config['output_dir'], "accepted.txt")
-            if os.path.exists(tiab_accepted_path):
-                 print("\nINFO: FTS disabled. Running Molecule Extraction on TIAB accepted articles.")
-                 run_mol_extraction = True
-                 source_file_exists = True
-            else: print(f"\nSkipping Molecule Extraction: TIAB accepted file ('{os.path.basename(tiab_accepted_path)}') not found.")
-
-        if run_mol_extraction and source_file_exists:
-             try:
-                 mol_extractor = MoleculeExtractor(config=config)
-                 mol_extractor.run()
-             except Exception as e: print(f"\n--- Critical error during Molecule Extraction ---\n{type(e).__name__}: {e}\nTraceback:"); traceback.print_exc(); print("--- Exiting ---"); sys.exit(1)
-        elif run_mol_extraction and not source_file_exists:
-             # This case should be caught above, but added for robustness
-             print("\nSkipping Molecule Extraction because the required input PMID file was not found.")
-
+        try:
+            # Check if we have articles with the right status
+            run_mol_extraction = False
+            articles_db = os.path.join(config['output_dir'], config['articles_file'].split(".")[0] + ".json")
+            if os.path.exists(articles_db):
+                articles = load_articles_from_json(articles_db)
+                if config.get('fts_enabled'):
+                    # Look for FTS accepted articles
+                    fts_accepted_count = sum(1 for article in articles.values() 
+                                           if article.status_fts == "accepted")
+                    if fts_ran_ok and fts_accepted_count > 0:
+                        run_mol_extraction = True
+                        print(f"\nFound {fts_accepted_count} FTS accepted articles for molecule extraction.")
+                    else:
+                        print(f"\nSkipping Molecule Extraction: FTS enabled but failed or no accepted articles found.")
+                else:
+                    # FTS disabled, look for TIAB accepted articles
+                    tiab_accepted_count = sum(1 for article in articles.values() 
+                                            if article.status_tiab == "accepted")
+                    if tiab_accepted_count > 0:
+                        run_mol_extraction = True
+                        print(f"\nINFO: FTS disabled. Found {tiab_accepted_count} TIAB accepted articles for molecule extraction.")
+                    else:
+                        print(f"\nSkipping Molecule Extraction: No TIAB accepted articles found.")
+            else:
+                print(f"\nSkipping Molecule Extraction: Articles database not found at {articles_db}")
+            
+            if run_mol_extraction:
+                mol_extractor = MoleculeExtractor(config=config)
+                mol_extractor.run()
+        except Exception as e: print(f"\n--- Critical error during Molecule Extraction ---\n{type(e).__name__}: {e}\nTraceback:"); traceback.print_exc(); print("--- Exiting ---"); sys.exit(1)
     else:
         print("\nMolecule Extraction is disabled in the configuration.")
 
