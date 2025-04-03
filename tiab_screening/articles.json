@@ -753,7 +753,15 @@
     "fts_notes": "",
     "status_pdf_fetch": "accepted",
     "pdf_link": "https://europepmc.org/articles/pmc6478544?pdf=render",
-    "molecules": [],
+    "molecules": [
+      "Nanoparticles",
+      "ITE",
+      "TSHR A-subunit protein",
+      "TgAb",
+      "TPOAb",
+      "TSHR antibodies",
+      "McLachlan et al."
+    ],
     "pdf_path": "/home/jorrit/Documents/Projects/AutoLitScreen/pdfs/30944161.pdf"
   },
   "31980336": {
@@ -806,7 +814,9 @@
     "fts_notes": "",
     "status_pdf_fetch": "accepted",
     "pdf_link": "https://www.frontiersin.org/articles/10.3389/fendo.2020.00372/pdf",
-    "molecules": [],
+    "molecules": [
+      "MSq1"
+    ],
     "pdf_path": "/home/jorrit/Documents/Projects/AutoLitScreen/pdfs/32676053.pdf"
   },
   "32935630": {
