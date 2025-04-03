@@ -1,0 +1,17 @@
+Analyze the full text provided, focusing on Methods and Results.
+
+Inclusion criteria:
+{inclusion}
+
+Exclusion criteria:
+{exclusion}
+
+
+Extracted Full Text:
+{full_text}
+
+Based on the full text criteria above, is this article relevant for inclusion? Respond with only 'FTS Relevant' or 'FTS Not Relevant', followed by a brief justification referencing methods/results.
+Example Response: FTS Relevant - Used HTRF assay showing molecule X increased cAMP via TSHR.
+Example Response: FTS Not Relevant - Measured cAMP but in response to a different receptor.
+
+Response:

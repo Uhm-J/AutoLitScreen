@@ -1,0 +1,15 @@
+Based on the title and abstract below, determine if the study is relevant.
+Inclusion criteria:
+{inclusion}
+
+Exclusion criteria:
+{exclusion}
+
+Title: {title}
+Abstract: {abstract}
+
+Is this study relevant based on the criteria above? Respond with only 'Relevant' or 'Not Relevant', followed by a brief one-sentence justification.
+Example Response: Relevant - Mentions TSHR, cAMP, and a small molecule antagonist.
+Example Response: Not Relevant - Only discusses TSH binding kinetics.
+
+Response:
