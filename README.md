@@ -29,7 +29,7 @@ An automated literature screening system powered by local LLMs (via Ollama) that
 
 1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/AutoLitScreen.git
+   git clone https://github.com/Uhm-J/AutoLitScreen.git
    cd AutoLitScreen
    ```
 
