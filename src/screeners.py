@@ -41,7 +41,7 @@ class TiabScreener:
         
         # Initialize clients
         self.pubmed_client = PubMedClient(email=self.config['email'])
-        self.ollama_client = OllamaClient(model_name=self.config['ollama_model'], api_url=self.config['ollama_url'], request_timeout=self.config['ollama_request_timeout'])
+        self.ollama_client = OllamaClient(model_name=self.config['ollama_model'], api_url=self.config['ollama_url'], request_timeout=self.config['ollama_request_timeout'], num_ctx=self.config['ollama_num_ctx'])
         self.pdf_downloader = PdfDownloader(download_dir=self.config['pdf_download_dir'], unpaywall_email=self.config['unpaywall_email']) if self.config.get('fetch_pdfs', False) else None
 
     def _get_pmids_to_process(self) -> List[str]:
@@ -284,7 +284,8 @@ class FTScreener:
         self.ollama_client = OllamaClient(
             model_name=self.config['ollama_model'], 
             api_url=self.config['ollama_url'], 
-            request_timeout=self.config['ollama_request_timeout']
+            request_timeout=self.config['ollama_request_timeout'],
+            num_ctx=self.config['ollama_num_ctx']
         )
         self.delay = self.config['request_delay_seconds']
 
@@ -468,7 +469,8 @@ class MoleculeExtractor:
         self.ollama_client = OllamaClient(
             model_name=self.config['ollama_model'], 
             api_url=self.config['ollama_url'], 
-            request_timeout=self.config['ollama_request_timeout']
+            request_timeout=self.config['ollama_request_timeout'],
+            num_ctx=self.config['ollama_num_ctx']
         )
         self.delay = self.config['request_delay_seconds']
 

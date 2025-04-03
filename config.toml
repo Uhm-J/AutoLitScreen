@@ -6,6 +6,7 @@ research_question = "Are there molecules interacting with TSHR that are not its 
 ollama_url = "http://localhost:11434/api/generate"
 ollama_model = "gemma3"
 ollama_request_timeout = 180
+ollama_num_ctx = 32768
 thinking = false
 request_delay_seconds = 1
 output_dir = "tiab_screening"

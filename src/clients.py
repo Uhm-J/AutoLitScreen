@@ -143,12 +143,12 @@ class PubMedClient:
 
 class OllamaClient:
     """Handles interactions with a local Ollama API endpoint."""
-    def __init__(self, model_name: str, api_url: str, request_timeout: int = 180):
-        self.model_name = model_name; self.api_url = api_url; self.timeout = request_timeout
+    def __init__(self, model_name: str, api_url: str, request_timeout: int = 180, num_ctx: int = 16384):
+        self.model_name = model_name; self.api_url = api_url; self.timeout = request_timeout; self.num_ctx = num_ctx
         self.headers = {'Content-Type': 'application/json'}; print(f"OllamaClient initialized: model '{model_name}', URL {api_url}")
     def generate(self, prompt: str) -> Tuple[Optional[str], Optional[str]]:
         """Sends a prompt to Ollama and returns the response."""
-        payload = {"model": self.model_name, "prompt": prompt, "stream": False}
+        payload = {"model": self.model_name, "prompt": prompt, "stream": False, "options": {"num_ctx": self.num_ctx}}
         try:
             response = requests.post(self.api_url, headers=self.headers, json=payload, timeout=self.timeout)
             response.raise_for_status()

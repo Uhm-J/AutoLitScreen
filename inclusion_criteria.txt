@@ -1,4 +1,5 @@
-- Criteria 1
-- Criteria 2
-- Criteria 3
-- Criteria 4
+- The study must explicitly mention the thyroid-stimulating hormone receptor (TSHR) in cells, tissues, or organisms.
+- The study examines molecules/compounds (small molecules, biologics, antibodies, peptides, etc.) that bind to or interact with TSHR.
+- These compounds must be distinct from the receptor’s natural ligand (TSH).
+- The study reports or measures cAMP levels, intracellular signaling changes, or functional outcomes relevant to cAMP production downstream of TSHR.
+- The article presents new data, insights, or a review of existing data specifically addressing such TSHR interactions and cAMP effects.

@@ -1,8 +1,12 @@
 Analyze the following text. Identify and list all specific small molecule drug names or chemical compound names mentioned that interact with TSHR and affect cAMP (as per the overall research question). Do not include TSH, proteins, genes, salts, ions, or general chemical classes.
 
-List each distinct molecule name found on a new line. Provide only the names. If no specific molecule names fitting the criteria are found, respond only with the word "None".
+List each distinct molecule name found on a new line. Provide only the names. If no specific molecule names are found, respond only with the word "None".
 
 Extracted Text:
 {full_text}
 
-Molecule Names:
+Example output:
+ANT-123
+DERIV-456
+
+Response:

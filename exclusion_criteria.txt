@@ -1,4 +1,4 @@
-- Criteria 1
-- Criteria 2
-- Criteria 3
-- Criteria 4
+- Studies that do not mention TSHR or only focus on thyroid hormone/T4/T3 pathways without addressing TSHR directly.
+- Studies that only investigate TSH (the endogenous hormone) as the ligand, without exploring other molecules or compounds interacting with TSHR.
+- Research that does not measure or discuss cAMP-related signaling outcomes (e.g., only discussing receptor structure or binding kinetics without functional readouts).
+- Articles that mention TSHR in passing or as part of broader endocrine pathways without specifically exploring non-TSH compounds affecting TSHR-mediated cAMP production.
