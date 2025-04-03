@@ -103,6 +103,7 @@ if __name__ == "__main__":
     parser.add_argument("--tiab-only", action="store_true", help="When used with --ris, export only TIAB accepted articles")
     parser.add_argument("--fts-only", action="store_true", help="When used with --ris, export only FTS accepted articles")
     parser.add_argument("--output", "-o", default="accepted_articles.ris", help="Output filename for RIS export (default: accepted_articles.ris)")
+    parser.add_argument("--input", "-i", default="pmid_for_review.txt", help="Input filename for PMIDs (default: pmid_for_review.txt)")
     args = parser.parse_args()
     
     CONFIG_FILE = "config.toml"
@@ -113,6 +114,7 @@ if __name__ == "__main__":
     config = {}
     try:
         config = load_config(CONFIG_FILE)
+        config['pmid_input_file'] = args.input if args.input else config['pmid_input_file']
         
         # Handle RIS export if requested
         if args.ris:
