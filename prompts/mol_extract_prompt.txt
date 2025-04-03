@@ -5,8 +5,4 @@ List each distinct molecule name found on a new line. Provide only the names. If
 Extracted Text:
 {full_text}
 
-Example output:
-ANT-123
-DERIV-456
-
 Response:

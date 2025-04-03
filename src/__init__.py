@@ -13,7 +13,6 @@ __all__ = [
     'load_pmids_from_file',
     'load_processed_pmids',
     'write_line_to_file',
-    'write_pmid_to_file',
     'load_text_file',
     'extract_pdf_text',
     'PubMedClient',

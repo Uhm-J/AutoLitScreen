@@ -1,11 +1,13 @@
 import os
 import sys
 import time
+import json
 from typing import Dict, List, Optional, Set, Tuple
+from dataclasses import asdict
 
 from .utils import (
     create_directory, load_pmids_from_file, load_processed_pmids,
-    write_pmid_to_file, load_text_file, save_articles_to_json, load_articles_from_json
+    load_text_file, save_articles_to_json, load_articles_from_json
 )
 from .pdf_utils import extract_pdf_text
 from .clients import PubMedClient, OllamaClient, PdfDownloader
@@ -15,6 +17,7 @@ class TiabScreener:
     """Orchestrates the TIAB screening process."""
     def __init__(self, config: Dict):
         self.config = config; self.research_question = self.config['research_question']
+        if not self.config.get('tiab_enabled'): raise ValueError("TIABScreener initialized but tiab_enabled is false.")
         # Load prompt template
         self.tiab_prompt_template = load_text_file(self.config['tiab_prompt_file'])
         if self.tiab_prompt_template is None: sys.exit(1)
@@ -25,6 +28,7 @@ class TiabScreener:
             print("Error: Failed to load inclusion or exclusion criteria files specified in config.")
             sys.exit(1)
 
+        # Set up output and download directories
         self.output_dir = self.config['output_dir']
         self.articles_file = os.path.join(self.output_dir, "articles.json")
         create_directory(self.output_dir)
@@ -32,12 +36,6 @@ class TiabScreener:
         # Load existing articles if the file exists
         self.articles = load_articles_from_json(self.articles_file)
         print(f"Loaded {len(self.articles)} previously processed articles.")
-        
-        # For backward compatibility, still check if files exist and maintain them
-        self.accepted_file = os.path.join(self.output_dir, "accepted.txt")
-        self.rejected_file = os.path.join(self.output_dir, "rejected.txt")
-        self.error_file = os.path.join(self.output_dir, "error_screening.txt")
-        self.pdf_failed_file = os.path.join(self.output_dir, "pdf_download_failed.txt")
         
         # Initialize clients
         self.pubmed_client = PubMedClient(email=self.config['email'])
@@ -94,25 +92,17 @@ class TiabScreener:
         if error_message:
             article.status_tiab = "error"
             status = f"Error - {error_message}"
-            # For legacy compatibility
-            write_pmid_to_file(article.pmid, self.error_file)
         elif screening_result:
             outcome = screening_result.lower().strip()
             if "relevant" in outcome:
                 article.status_tiab = "accepted"
                 status = "Accepted"
-                # For legacy compatibility
-                write_pmid_to_file(article.pmid, self.accepted_file)
             else:
                 article.status_tiab = "rejected"
                 status = "Rejected"
-                # For legacy compatibility
-                write_pmid_to_file(article.pmid, self.rejected_file)
         else:
             article.status_tiab = "error"
             status = "Error - No result"
-            # For legacy compatibility
-            write_pmid_to_file(article.pmid, self.error_file)
             
         # Save updated article data
         self.articles[article.pmid] = article
@@ -160,8 +150,6 @@ class TiabScreener:
                             status_tiab="error"
                         )
                         self.articles[pmid] = error_article
-                        # For legacy compatibility
-                        write_pmid_to_file(pmid, self.error_file)
                         run_error_count += 1
                         run_processed_count += 1
                 
@@ -180,8 +168,6 @@ class TiabScreener:
                             status_tiab="error"
                         )
                         self.articles[pmid] = error_article
-                        # For legacy compatibility
-                        write_pmid_to_file(pmid, self.error_file)
                         run_error_count += 1
                         run_processed_count += 1
                     continue
@@ -211,8 +197,7 @@ class TiabScreener:
                         run_pdf_downloaded_count += 1
                     else:
                         run_pdf_failed_count += 1
-                        print(f"  PDF Download Failed: Logging PMID {pmid} to {os.path.basename(self.pdf_failed_file)}")
-                        write_pmid_to_file(pmid, self.pdf_failed_file)
+                        print(f"  PDF Download Failed for PMID {pmid}")
                     
                     # Update article in the dictionary
                     self.articles[pmid] = article
@@ -245,7 +230,7 @@ class TiabScreener:
         print(f"\nTIAB results saved in '{self.output_dir}'.")
         
         if self.config.get('fetch_pdfs', False):
-            print(f"PDFs saved in '{self.config['pdf_download_dir']}'. Failed PDF PMIDs logged to '{os.path.basename(self.pdf_failed_file)}'.")
+            print(f"PDFs saved in '{self.config['pdf_download_dir']}'.")
         
         print("---------------------------------------")
 
@@ -272,12 +257,6 @@ class FTScreener:
         self.articles_file = os.path.join(self.output_dir, "articles.json")
         self.articles = load_articles_from_json(self.articles_file)
         print(f"Loaded {len(self.articles)} articles from TIAB phase.")
-        
-        # For backward compatibility
-        self.tiab_accepted_file = os.path.join(self.config['output_dir'], "accepted.txt")
-        self.fts_accepted_file = os.path.join(self.fts_output_dir, "fts_accepted.txt")
-        self.fts_rejected_file = os.path.join(self.fts_output_dir, "fts_rejected.txt")
-        self.fts_error_file = os.path.join(self.fts_output_dir, "fts_error.txt")
         
         create_directory(self.fts_output_dir)
         
@@ -348,31 +327,21 @@ class FTScreener:
         if error_message:
             article.status_fts = "error"
             status = f"Error - {error_message}"
-            # For legacy compatibility
-            write_pmid_to_file(article.pmid, self.fts_error_file)
         elif screening_result:
             print(f"  Ollama FTS Raw Result: {screening_result}")
             outcome = screening_result.lower().strip()
             if "fts relevant" in outcome:
                 article.status_fts = "accepted"
                 status = "FTS Accepted"
-                # For legacy compatibility
-                write_pmid_to_file(article.pmid, self.fts_accepted_file)
             elif "fts not relevant" in outcome:
                 article.status_fts = "rejected"
                 status = "FTS Rejected"
-                # For legacy compatibility
-                write_pmid_to_file(article.pmid, self.fts_rejected_file)
             else:
                 article.status_fts = "error"
                 status = "Error - Unclear FTS"
-                # For legacy compatibility
-                write_pmid_to_file(article.pmid, self.fts_error_file)
         else:
             article.status_fts = "error"
             status = "Error - No FTS Result"
-            # For legacy compatibility
-            write_pmid_to_file(article.pmid, self.fts_error_file)
             
         # Save updated articles data
         self.articles[article.pmid] = article

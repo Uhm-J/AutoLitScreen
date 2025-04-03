@@ -98,10 +98,6 @@ def write_line_to_file(line: str, filepath: str) -> bool:
         return True
     except IOError as e: print(f"  Error writing line to {filepath}: {e}"); return False
 
-def write_pmid_to_file(pmid: str, filepath: str) -> bool:
-    """Appends a PMID (as a line) to the specified file."""
-    return write_line_to_file(pmid, filepath)
-
 def load_text_file(filepath: str) -> Optional[str]:
      """Loads text content from a file."""
      try:
